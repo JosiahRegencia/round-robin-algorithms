@@ -1,0 +1,6 @@
+Process ID,Arrival Time,CPU Burst
+0,0,5
+1,0,12
+2,0,20
+3,0,26
+4,0,34

@@ -16,16 +16,26 @@ for process in pcb.queue:
 print 'Start Scheduling Algorithm: \n\n'
 
 def rr(pcb):
-	time_quantum = 15
+	time_quantum = 5
+	time_passed = 0 
+	iterations = 0
 	
 	while not pcb.is_empty():
 		curr_proc = pcb.dequeue()
+		print 'P{}\t->\tCPU Remaining Burst: {}'.format(curr_proc.index, curr_proc.cpu_burst)
 		if curr_proc.cpu_burst <= time_quantum:
+			time_passed += curr_proc.cpu_burst
 			curr_proc.cpu_burst = 0
 		else:
 			curr_proc.cpu_burst -= time_quantum
+			time_passed += time_quantum
 			pcb.enqueue(curr_proc)
-		print 'P{}\t->\tCPU Remaining Burst: {}'.format(curr_proc.index, curr_proc.cpu_burst)
+		print 'P{}\t->\tCPU Remaining Burst: {}\tTime Passed: {}'.format(curr_proc.index, curr_proc.cpu_burst, time_passed)
+		print '\n'
+		iterations += 1
+
+	print '\n\n'
+	print 'Context Switches: {}'.format(iterations-1)
 
 def main():
 	rr(pcb)
