@@ -19,11 +19,14 @@ class Processor():
 		print 'Process ID: {}\t'.format(process.process_id),
 		print 'Arrival Time: {}\t'.format(process.arrival_time),
 		print 'Remaining Burst: {}\t'.format(process.cpu_burst)
+		print '------------------------------------------------------'
 		if process.cpu_burst <= self.time_quantum:
 			process.cpu_burst = 0
 			print 'Process ID: {}\t'.format(process.process_id),
 			print 'Arrival Time: {}\t'.format(process.arrival_time),
 			print 'Remaining Burst: {}\t'.format(process.cpu_burst)
+			print '------------------------------------------------------'
+
 			return process.cpu_burst
 		else:
 			process.cpu_burst -= self.time_quantum
@@ -31,4 +34,6 @@ class Processor():
 			print 'Process ID: {}\t'.format(process.process_id),
 			print 'Arrival Time: {}\t'.format(process.arrival_time),
 			print 'Remaining Burst: {}\t'.format(process.cpu_burst)
+			print '------------------------------------------------------'
+
 			return self.time_quantum

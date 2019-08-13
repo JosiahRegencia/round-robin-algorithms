@@ -11,12 +11,9 @@ iterations = 0
 
 def new_processes():
 	global time_elapsed
-	while not events_queue.is_empty():
-		#  and not processor.is_idle()
-		print 'length of events: ', events_queue
-		curr_proc = []
-	 	while events_queue.front().arrival_time <= time_elapsed:
-	 		processor.insert(events_queue.dequeue())
-	 	time_elapsed += processor.run_process()
+	while not events_queue.is_empty() and events_queue.front().arrival_time <= time_elapsed:
+		processor.insert(events_queue.dequeue())
+	 	while not processor.is_idle():
+	 		time_elapsed += processor.run_process()
 
 new_processes()

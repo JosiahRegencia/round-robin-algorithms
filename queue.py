@@ -14,7 +14,6 @@ class Queue:
 		try:
 			return self.queue[0]
 		except IndexError as error:
-			print 'inside front method'
 			print 'Error: ', error
 			print 'Queue is empty'
 
