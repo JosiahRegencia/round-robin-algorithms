@@ -2,6 +2,9 @@ class Queue:
 	def __init__(self):
 		self.queue = list()
 
+	def size(self):
+		return len(self.queue)
+
 	def is_empty(self):
 		if len(self.queue) == 0:
 			return True
@@ -11,6 +14,7 @@ class Queue:
 		try:
 			return self.queue[0]
 		except IndexError as error:
+			print 'inside front method'
 			print 'Error: ', error
 			print 'Queue is empty'
 
