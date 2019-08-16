@@ -35,3 +35,6 @@ class Queue:
 		except ValueError as error:
 			print 'Error: ', error
 			print 'Queue is empty'
+
+	def priority_enqueue(self, item):
+		pass
