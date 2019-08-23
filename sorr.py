@@ -12,30 +12,30 @@ from queue import Queue
 import parser
 
 class SORR_Processor(Processor):
-
-	def insert(self, process):
-		heappush(self.process_queue.queue, (process.cpu_burst, process))
+	def arrange(self):
+		self.process_queue.queue = sorted(self.process_queue.queue, key=lambda process: process.cpu_burst)
 
 	def STQ(self):
 		mean = 0
 
-		top_quantum = max(self.process_queue.queue, key=lambda item:item[1])[0]
+		top_quantum = max(self.process_queue.queue, key=lambda item:item.cpu_burst).cpu_burst
 
-		for priority, process in self.process_queue.queue:
+		for process in self.process_queue.queue:
 			mean += process.cpu_burst
 
 		mean = mean / self.process_queue.size()
 		stq = (mean + top_quantum) / 2
-		return stq
+		print 'STQ: ', stq
+		self.time_quantum = stq
 
-	def run_process(self, time_quantum):
-		priority, process = heappop(self.process_queue.queue)
+	def run_process(self):
+		process = self.process_queue.dequeue()
 		print 'Enter\t',
 		print 'Process ID: {}\t'.format(process.process_id),
 		print 'Arrival Time: {}\t'.format(process.arrival_time),
 		print 'Remaining Burst: {}\t'.format(process.cpu_burst)
 		print '----------------------------------------------------------------------'
-		if process.cpu_burst <= time_quantum:
+		if process.cpu_burst <= self.time_quantum:
 			elapsed_time = process.cpu_burst
 			process.cpu_burst = 0
 			print 'Exit\t',
@@ -46,13 +46,16 @@ class SORR_Processor(Processor):
 
 			return elapsed_time
 		else:
-			process.cpu_burst -= time_quantum
-			heappush(self.process_queue.queue, (process.cpu_burst, process))
+			process.cpu_burst -= self.time_quantum
 			print 'Exit\t',
 			print 'Process ID: {}\t'.format(process.process_id),
 			print 'Arrival Time: {}\t'.format(process.arrival_time),
 			print 'Remaining Burst: {}\t'.format(process.cpu_burst)
 			print '----------------------------------------------------------------------'
+			if process.cpu_burst <= self.time_quantum:
+				self.process_queue.insert_top(process)
+			else:
+				self.process_queue.enqueue(process)
 
 			return self.time_quantum
 
@@ -63,15 +66,16 @@ time_elapsed = 0
 iterations = 0
 
 def new_processes():
-	global time_elapsed
+	global time_elapsed, iterations
 	while not events_queue.is_empty():
+		iterations += 1
 		print 'Time Elasped: ', time_elapsed
 		while not events_queue.is_empty() and events_queue.front().arrival_time <= time_elapsed:
 			processor.insert(events_queue.dequeue())
-		time_quantum = processor.STQ()
-		print 'STQ: ', time_quantum
+		if iterations == 1:
+			time_quantum = processor.STQ()
 	 	while not processor.is_idle():
-	 		time_elapsed += processor.run_process(time_quantum)
+	 		time_elapsed += processor.run_process()
 	 		print 'Time Elasped: ', time_elapsed
 
 new_processes()

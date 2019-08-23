@@ -36,5 +36,5 @@ class Queue:
 			print 'Error: ', error
 			print 'Queue is empty'
 
-	def priority_enqueue(self, item):
-		pass
+	def insert_top(self, item):
+		self.queue.insert(0, item)
