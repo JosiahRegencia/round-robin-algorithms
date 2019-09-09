@@ -1,6 +1,6 @@
 """
 
-Smart Optimized Round Robin (SORR) CPU Scheduling Algorithm by Rahul Joshi and Shashi Bhushan Tyagi
+Optimized Time Quantum for Dynamic Round Robin Algorithm
 
 """
 
@@ -10,9 +10,10 @@ from processor import Processor
 from queue import Queue
 
 import parser
+import math
 
 
-class SORR_Processor(Processor):
+class OTQRR_Processor(Processor):
     def arrange(self):
         self.process_queue.queue = sorted(
             self.process_queue.queue, key=lambda process: process.cpu_burst)
@@ -20,24 +21,20 @@ class SORR_Processor(Processor):
     def STQ(self):
         mean = 0
 
-        top_quantum = max(self.process_queue.queue,
-                          key=lambda item: item.cpu_burst).cpu_burst
+        TQ = math.floor(math.sqrt(sum(
+            process.cpu_burst**2 for process in self.process_queue.queue) / self.process_queue.size()) * 0.9)
+        min_quantum = self.get_min_quantum()
+        median = self.get_burst_median()
 
-        for process in self.process_queue.queue:
-            mean += process.cpu_burst
-
-        mean = mean / self.process_queue.size()
-        stq = (mean + top_quantum) / 2
-        print ('STQ: ', stq)
-        self.time_quantum = stq
+        self.time_quantum = TQ
 
     def run_process(self):
         process = self.process_queue.dequeue()
-        print ('Time quantum: ', self.time_quantum)
+        print 'Time quantum: ', self.time_quantum
         self.print_results('Enter', process.process_id,
                            process.arrival_time, process.cpu_burst)
         if process.cpu_burst <= self.time_quantum:
-            print ('Time quantum: ', self.time_quantum)
+            print 'Time quantum: ', self.time_quantum
             elapsed_time = process.cpu_burst
             process.cpu_burst = 0
             self.print_results('Exit', process.process_id,
@@ -46,7 +43,7 @@ class SORR_Processor(Processor):
             return elapsed_time, process
         else:
             process.cpu_burst -= self.time_quantum
-            print ('Time quantum: ', self.time_quantum)
+            print 'Time quantum: ', self.time_quantum
             self.print_results('Exit', process.process_id,
                                process.arrival_time, process.cpu_burst)
             if process.cpu_burst <= self.time_quantum:
@@ -58,7 +55,7 @@ class SORR_Processor(Processor):
 
 
 events_queue = parser.get_processes()
-processor = SORR_Processor()
+processor = OTQRR_Processor()
 finished_processes = list()
 time_elapsed = 0
 iterations = 0
@@ -68,31 +65,29 @@ def new_processes():
     global time_elapsed, iterations
     while not events_queue.is_empty():
         iterations += 1
-        print ('Time Elasped: ', time_elapsed)
+        print 'Time Elasped: ', time_elapsed
         while not events_queue.is_empty() and events_queue.front().arrival_time <= time_elapsed:
             processor.insert(events_queue.dequeue())
-        if iterations == 1:
-            processor.STQ()
-            processor.arrange()
+        processor.STQ()
         if events_queue.is_empty():
             while not processor.is_idle():
                 exec_time, process = processor.run_process()
                 time_elapsed += exec_time
-                print ('Time Elapsed: ', time_elapsed)
+                print 'Time Elapsed: ', time_elapsed
                 check_process(process, time_elapsed)
         else:
-            while time_elapsed <= events_queue.front().arrival_time:
+            while events_queue.front().arrival_time <= time_elapsed:
                 exec_time, process = processor.run_process()
                 time_elapsed += exec_time
-                print ('Time Elapsed: ', time_elapsed)
+                print 'Time Elapsed: ', time_elapsed
                 check_process(process, time_elapsed)
     for process in finished_processes:
-        print ('Process ID:', process.process_id, end="\t"),
-        print ('Arrival Time:', process.arrival_time, end="\t"),
-        print ('CPU Burst:', process.cpu_burst, end="\t"),
-        print ('Completion Time:', process.completion_time, end="\t"),
-        print ('Turnaround Time:', process.turnaround_time, end="\t"),
-        print ('Waiting Time:', process.waiting_time)
+        print 'Process ID:\t', process.process_id,
+        print 'Arrival Time:\t', process.arrival_time,
+        print 'CPU Burst:\t', process.cpu_burst,
+        print 'Completion Time:\t', process.completion_time,
+        print 'Turnaround Time:\t', process.turnaround_time,
+        print 'Waiting Time:\t', process.waiting_time
     calculate_averages(finished_processes)
 
 
@@ -104,12 +99,11 @@ def check_process(process, time_elapsed):
 
 
 def calculate_averages(processes):
-    AWT = sum(float(process.waiting_time)
-              for process in processes) / len(processes)
-    ATT = sum(float(process.turnaround_time)
-              for process in processes) / len(processes)
-    print ('Average Waiting Time:', AWT, end="\t")
-    print ('Average Turnaround Time:', ATT, end="\n")
+    AWT = sum(process.waiting_time for process in processes) / len(processes)
+    ATT = sum(process.turnaround_time for process in processes) / \
+        len(processes)
+    print 'Average Waiting Time:\t', AWT
+    print 'Average Turnaround Time:\t', ATT
 
 
 new_processes()
